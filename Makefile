@@ -19,7 +19,12 @@ build/utils.o: src/utils.cpp
 01_gpu_conv2d_run.out: scripts/01_gpu_conv2d_run.cu src/01_gpu_conv2d.cu build/utils.o
 	$(CC) -w build/utils.o src/01_gpu_conv2d.cu scripts/01_gpu_conv2d_run.cu -o bin/01_gpu_conv2d_run.out
 
+# Constant memory GPU
+02_gpu_conv2d_constMem_run.out: scripts/02_gpu_conv2d_constMem_run.cu src/02_gpu_conv2d_constMem.cu build/utils.o
+	$(CC) -w build/utils.o src/02_gpu_conv2d_constMem.cu scripts/02_gpu_conv2d_constMem_run.cu -o bin/02_gpu_conv2d_constMem_run.out
+
+
 # Clean executable files
 clean: 
 	@echo "Removing object files..."
-	rm *.out build/*.o
+	rm bin/*.out build/*.o
