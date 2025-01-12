@@ -246,11 +246,21 @@ int main(int argc, char const *argv[])
         std::cout << "Benchmarking details: \n";
         std::cout << "--------------------- \n";
         if (iter == 0)
+        {
+            std::cout << "Time (total): " << (elapsed_time_kernel.count() + elapsed_time_mem_alloc.count() + 
+                                                elapsed_time_mem_transfer_input.count() + elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6 << "\n";
             std::cout << "FPS (total): " << 1 / ((elapsed_time_kernel.count() + elapsed_time_mem_alloc.count() + 
                                                 elapsed_time_mem_transfer_input.count() + elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6) << "\n";
+            std::cout << "\n";
+        }
         else
+        {
+            std::cout << "Time (total): " << (elapsed_time_kernel.count() +  elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6 << "\n";
             std::cout << "FPS (total): " << 1 / ((elapsed_time_kernel.count() +  elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6) << "\n";
+            std::cout << "\n";
+        }
 
+        std::cout << "Time (kernel): " << (elapsed_time_kernel.count())/1e+6 << "\n";
         std::cout << "FPS (kernel): " << 1 / ((elapsed_time_kernel.count())/1e+6) << "\n";
         std::cout << "GFLOPS (kernel): " << (2*new_size*new_size*(2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1) * 1e-9) / (elapsed_time_kernel.count()/1e+6) << "\n";
         std::cout << "------------------------------------ \n";
