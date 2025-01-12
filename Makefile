@@ -1,4 +1,4 @@
-CC = nvcc
+CC = nvcc -gencode arch=compute_86,code=sm_86
 
 DEVICE_USAGE = --ptxas-options=-v
 HOST_COMPILE_FLAG = -c
@@ -21,8 +21,7 @@ build/utils.o: src/utils.cpp
 
 # Constant memory GPU
 02_gpu_conv2d_constMem_run.out: scripts/02_gpu_conv2d_constMem_run.cu src/02_gpu_conv2d_constMem.cu build/utils.o
-	$(CC) -w build/utils.o src/02_gpu_conv2d_constMem.cu scripts/02_gpu_conv2d_constMem_run.cu -o bin/02_gpu_conv2d_constMem_run.out
-
+	$(CC) -w -rdc=true scripts/02_gpu_conv2d_constMem_run.cu src/02_gpu_conv2d_constMem.cu build/utils.o -o bin/02_gpu_conv2d_constMem_run.out
 
 # Clean executable files
 clean: 
