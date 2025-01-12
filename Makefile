@@ -15,6 +15,10 @@ build/utils.o: src/utils.cpp
 00_cpu_conv2d_run.out: scripts/00_cpu_conv2d_run.cpp src/00_cpu_conv2d.cpp build/utils.o
 	$(CC) $(CPU_OPTIMIZE) build/utils.o src/00_cpu_conv2d.cpp scripts/00_cpu_conv2d_run.cpp -o bin/00_cpu_conv2d_run.out
 
+# Naive GPU
+01_gpu_conv2d_run.out: scripts/01_gpu_conv2d_run.cu src/01_gpu_conv2d.cu build/utils.o
+	$(CC) -w build/utils.o src/01_gpu_conv2d.cu scripts/01_gpu_conv2d_run.cu -o bin/01_gpu_conv2d_run.out
+
 # Clean executable files
 clean: 
 	@echo "Removing object files..."
