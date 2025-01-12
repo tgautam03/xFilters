@@ -10,8 +10,6 @@
 #include "../include/01_gpu_conv2d.cuh"
 #include "../include/utils.hpp"
 
-#define FILTER_RADIUS 1
-
 // CUDA Error Checking
 #define cuda_check(err) { \
     if (err != cudaSuccess) { \
@@ -23,14 +21,12 @@
 int main(int argc, char const *argv[])
 {
     // Benchmarking variables
-    auto start = std::chrono::high_resolution_clock::now();
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto elapsed_time_mem_alloc = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    auto elapsed_time_mem_transfer_input = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    auto elapsed_time_mem_transfer_filter = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    auto elapsed_time_mem_transfer_output = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    auto elapsed_time_kernel = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
+    float elapsed_time_mem_alloc, 
+            elapsed_time_mem_t_in, elapsed_time_mem_t_f, elapsed_time_mem_t_out, 
+            elapsed_time_kernel;
+    cudaEvent_t beg, end;
+    cudaEventCreate(&beg);
+    cudaEventCreate(&end);
     // ---------------------------------------------------------- //
     // ------------------ Load image in memory ------------------ //
     // ---------------------------------------------------------- //
@@ -61,7 +57,7 @@ int main(int argc, char const *argv[])
     cudaError_t err;
     
     std::cout << "Allocating GPU memory... \n";
-    start = std::chrono::high_resolution_clock::now();
+    cudaEventRecord(beg);
     
     float* d_N;
     err = cudaMalloc((void**) &d_N, new_size*new_size*sizeof(float));
@@ -75,30 +71,34 @@ int main(int argc, char const *argv[])
     err = cudaMalloc((void**) &d_P, new_size*new_size*sizeof(float));
     cuda_check(err);
 
-    stop = std::chrono::high_resolution_clock::now();
+    cudaEventRecord(end);
+    cudaEventSynchronize(beg);
+    cudaEventSynchronize(end);
+    cudaEventElapsedTime(&elapsed_time_mem_alloc, beg, end);
+    elapsed_time_mem_alloc /= 1000.;
 
-    elapsed_time_mem_alloc = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-    std::cout << "Time for GPU memory allocation (seconds): " << (elapsed_time_mem_alloc.count()/1e+6) << "\n";
+    std::cout << "Time for GPU memory allocation (seconds): " << elapsed_time_mem_alloc << "\n";
     std::cout << "\n";
 
     // ---------------------------------------------------------- //
     // ------------------- Move input to GPU -------------------- //
     // ---------------------------------------------------------- //
     std::cout << "Moving input to GPU memory... \n";
-    start = std::chrono::high_resolution_clock::now();
+    cudaEventRecord(beg);
     
     err = cudaMemcpy(d_N, N, new_size*new_size*sizeof(float), cudaMemcpyHostToDevice);
     cuda_check(err);
 
-    stop = std::chrono::high_resolution_clock::now();
-
-    elapsed_time_mem_transfer_input = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-    std::cout << "Time for input data transfer (seconds): " << (elapsed_time_mem_transfer_input.count()/1e+6) << "\n";
+    cudaEventRecord(end);
+    cudaEventSynchronize(beg);
+    cudaEventSynchronize(end);
+    cudaEventElapsedTime(&elapsed_time_mem_t_in, beg, end);
+    elapsed_time_mem_t_in /= 1000.;
+    std::cout << "Time for input data transfer (seconds): " << elapsed_time_mem_t_in << "\n";
     std::cout << "\n";
+
     // ------------------------------------------------------------------------- //
-    // Which filter; Options: Sharpen, High-pass, Low-pass, Gaussian, d_Gaussian //
+    // ----------------------- Initialize filter ------------------------------- //
     // ------------------------------------------------------------------------- //
     std::string filter_type;
     float *F = new float[(2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1)];
@@ -106,9 +106,13 @@ int main(int argc, char const *argv[])
     int iter = 0;
     while (true)
     {
+        // ------------------------------------------------------------------------- //
+        // Which filter; Options: Sharpen, High-pass, Low-pass, Gaussian, d_Gaussian //
+        // ------------------------------------------------------------------------- //
         std::cout << "Filter options: Sharpen, High-pass, Low-pass, Gaussian, d_Gaussian \n";
         std::cout << "Enter filter (press 'q' to exit): ";
         std::cin >> filter_type;
+
 
         // ---------------------------------------------------------- //
         // ---------------- Defining filter matrix ------------------ //
@@ -201,19 +205,24 @@ int main(int argc, char const *argv[])
             std::terminate();
         }
 
-        // Move filter to GPU
+        
+        // ---------------------------------------------------------- //
+        // ------------------ Move filter to GPU -------------------- //
+        // ---------------------------------------------------------- //
         std::cout << "Moving filter to GPU memory... \n";
-        start = std::chrono::high_resolution_clock::now();
+        cudaEventRecord(beg);
         
         err = cudaMemcpy(d_F, F, (2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1)*sizeof(float), cudaMemcpyHostToDevice);
         cuda_check(err);
 
-        stop = std::chrono::high_resolution_clock::now();
-
-        elapsed_time_mem_transfer_filter = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-        std::cout << "Time for filter data transfer (seconds): " << (elapsed_time_mem_transfer_filter.count()/1e+6) << "\n";
+        cudaEventRecord(end);
+        cudaEventSynchronize(beg);
+        cudaEventSynchronize(end);
+        cudaEventElapsedTime(&elapsed_time_mem_t_f, beg, end);
+        elapsed_time_mem_t_f /= 1000.;
+        std::cout << "Time for filter data transfer (seconds): " << elapsed_time_mem_t_f << "\n";
         std::cout << "\n";
+
         // ---------------------------------------------------------- //
         // --------------------- 2D Convolution --------------------- //
         // ---------------------------------------------------------- //
@@ -221,48 +230,63 @@ int main(int argc, char const *argv[])
         // Applying filters frame by frame
         std::cout << "Applying filter... \n"; 
 
-        start = std::chrono::high_resolution_clock::now();
-        gpu_conv2d(d_N, d_F, d_P, FILTER_RADIUS, new_size, new_size);
-        stop = std::chrono::high_resolution_clock::now();
+        // Kernel execution
+        cudaEventRecord(beg);
 
-        elapsed_time_kernel = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-        std::cout << "Time for kernel execution (seconds): " << (elapsed_time_kernel.count()/1e+6) << "\n";
+        dim3 dim_block(32, 32, 1);
+        dim3 dim_grid(ceil(new_size/(float)(32)), ceil(new_size/(float)(32)), 1);
+        gpu_conv2d_kernel<<<dim_grid, dim_block>>>(d_N, d_F, d_P, new_size, new_size);
+        
+        cudaEventRecord(end);
+        cudaEventSynchronize(beg);
+        cudaEventSynchronize(end);
+        cudaEventElapsedTime(&elapsed_time_kernel, beg, end);
+        elapsed_time_kernel /= 1000.;
+        std::cout << "Time for kernel execution (seconds): " << elapsed_time_kernel << "\n";
         std::cout << "\n";
 
-        // Copying result back to host memory
+        // ---------------------------------------------------------- //
+        // ---------- Copying result back to host memory -------------//
+        // ---------------------------------------------------------- //
         std::cout << "Moving result to CPU memory... \n";
-        start = std::chrono::high_resolution_clock::now();
+        cudaEventRecord(beg);
+        
         err = cudaMemcpy(P, d_P, new_size*new_size*sizeof(float), cudaMemcpyDeviceToHost);
         cuda_check(err);
-        stop = std::chrono::high_resolution_clock::now();
-
-        elapsed_time_mem_transfer_output = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-        std::cout << "Time for output data transfer (seconds): " << (elapsed_time_mem_transfer_output.count()/1e+6) << "\n";
+        
+        cudaEventRecord(end);
+        cudaEventSynchronize(beg);
+        cudaEventSynchronize(end);
+        cudaEventElapsedTime(&elapsed_time_mem_t_out, beg, end);
+        elapsed_time_mem_t_out /= 1000.;
+        std::cout << "Time for output data transfer (seconds): " << elapsed_time_mem_t_out << "\n";
         std::cout << "\n";
+
+        // ---------------------------------------------------------- //
+        // --------------------- Benchmarking ------------------------//
+        // ---------------------------------------------------------- //
 
         std::cout << "--------------------- \n";
         std::cout << "Benchmarking details: \n";
         std::cout << "--------------------- \n";
         if (iter == 0)
         {
-            std::cout << "Time (total): " << (elapsed_time_kernel.count() + elapsed_time_mem_alloc.count() + 
-                                                elapsed_time_mem_transfer_input.count() + elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6 << "\n";
-            std::cout << "FPS (total): " << 1 / ((elapsed_time_kernel.count() + elapsed_time_mem_alloc.count() + 
-                                                elapsed_time_mem_transfer_input.count() + elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6) << "\n";
+            std::cout << "Time (total): " << elapsed_time_kernel + elapsed_time_mem_alloc + 
+                                                elapsed_time_mem_t_in + elapsed_time_mem_t_f + elapsed_time_mem_t_out << "\n";
+            std::cout << "FPS (total): " << 1 / (elapsed_time_kernel + elapsed_time_mem_alloc + 
+                                                elapsed_time_mem_t_in + elapsed_time_mem_t_f + elapsed_time_mem_t_out) << "\n";
             std::cout << "\n";
         }
         else
         {
-            std::cout << "Time (total): " << (elapsed_time_kernel.count() +  elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6 << "\n";
-            std::cout << "FPS (total): " << 1 / ((elapsed_time_kernel.count() +  elapsed_time_mem_transfer_filter.count()+ elapsed_time_mem_transfer_output.count())/1e+6) << "\n";
+            std::cout << "Time (total): " << elapsed_time_kernel +  elapsed_time_mem_t_f + elapsed_time_mem_t_out << "\n";
+            std::cout << "FPS (total): " << 1 / (elapsed_time_kernel +  elapsed_time_mem_t_f+ elapsed_time_mem_t_out) << "\n";
             std::cout << "\n";
         }
 
-        std::cout << "Time (kernel): " << (elapsed_time_kernel.count())/1e+6 << "\n";
-        std::cout << "FPS (kernel): " << 1 / ((elapsed_time_kernel.count())/1e+6) << "\n";
-        std::cout << "GFLOPS (kernel): " << (2*new_size*new_size*(2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1) * 1e-9) / (elapsed_time_kernel.count()/1e+6) << "\n";
+        std::cout << "Time (kernel): " << elapsed_time_kernel << "\n";
+        std::cout << "FPS (kernel): " << 1 / (elapsed_time_kernel) << "\n";
+        std::cout << "GFLOPS (kernel): " << 2*new_size*new_size*(2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1) * 1e-9 / elapsed_time_kernel << "\n";
         std::cout << "------------------------------------ \n";
         std::cout << "\n";
 
@@ -283,10 +307,9 @@ int main(int argc, char const *argv[])
         iter += 1;
     }
 
-    delete[] F;
     delete[] N;
+    delete[] F;
     delete[] P;
-    delete[] img;
 
     cudaFree(d_N);
     cudaFree(d_F);
