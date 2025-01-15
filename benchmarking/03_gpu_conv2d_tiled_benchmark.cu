@@ -202,7 +202,7 @@ int main(int argc, char const *argv[])
     }
 
     // Write the output image to a file
-    stbi_write_png("data/gpu_tiled_benchmark_output_img.png", n_cols, n_rows, 1, ucharData.data(), n_cols);
+    stbi_write_png("data/img_output/gpu_tiled_benchmark_output_img.png", n_cols, n_rows, 1, ucharData.data(), n_cols);
 
     // ----------------------------------------------------------------- //
     // ------------------ Saving benchmark results --------------------- //
