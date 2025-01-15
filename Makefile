@@ -27,6 +27,18 @@ build/utils.o: src/utils.cpp
 03_gpu_conv2d_tiled_benchmark.out: benchmarking/03_gpu_conv2d_tiled_benchmark.cu src/03_gpu_conv2d_tiled.cu build/utils.o
 	$(CC) -w -rdc=true build/utils.o src/03_gpu_conv2d_tiled.cu benchmarking/03_gpu_conv2d_tiled_benchmark.cu -o bin/03_gpu_conv2d_tiled_benchmark.out
 
+# Benchmark Pinned GPU
+04_gpu_conv2d_pinnedMem_benchmark.out: benchmarking/04_gpu_conv2d_pinnedMem_benchmark.cu src/01_gpu_conv2d.cu build/utils.o
+	$(CC) -w build/utils.o src/01_gpu_conv2d.cu benchmarking/04_gpu_conv2d_pinnedMem_benchmark.cu -o bin/04_gpu_conv2d_pinnedMem_benchmark.out
+
+# Benchmark Pinned & Constant GPU
+05_gpu_conv2d_pinnedConstMem_benchmark.out: benchmarking/05_gpu_conv2d_pinnedConstMem_benchmark.cu src/02_gpu_conv2d_constMem.cu build/utils.o
+	$(CC) -w -rdc=true build/utils.o src/02_gpu_conv2d_constMem.cu benchmarking/05_gpu_conv2d_pinnedConstMem_benchmark.cu -o bin/05_gpu_conv2d_pinnedConstMem_benchmark.out
+
+# Benchmark Pinned & Constant GPU
+06_gpu_conv2d_pinnedTiled_benchmark.out: benchmarking/06_gpu_conv2d_pinnedTiled_benchmark.cu src/03_gpu_conv2d_tiled.cu build/utils.o
+	$(CC) -w -rdc=true build/utils.o src/03_gpu_conv2d_tiled.cu benchmarking/06_gpu_conv2d_pinnedTiled_benchmark.cu -o bin/06_gpu_conv2d_pinnedTiled_benchmark.out
+
 
 # Naive CPU
 00_cpu_conv2d_run.out: scripts/00_cpu_conv2d_run.cpp src/00_cpu_conv2d.cpp build/utils.o
