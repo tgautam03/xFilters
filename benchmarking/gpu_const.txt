@@ -1,0 +1,20 @@
+------------------------------------------ 
+GPU (constant memory) Benchmarking details 
+------------------------------------------ 
+Time for GPU memory allocation (seconds): 0.000185344
+
+Time for input data transfer (seconds): 0.00282915
+
+Time for filter data transfer (seconds): 0.000155584
+
+Time for kernel execution (seconds): 4.41958e-05
+
+Time for output data transfer (seconds): 0.00631235
+
+Time (total): 0.00952663
+FPS (total): 104.969
+
+Time (kernel): 4.41958e-05
+FPS (kernel): 22626.6
+GFLOPS (kernel): 1708.25
+------------------------------------------
