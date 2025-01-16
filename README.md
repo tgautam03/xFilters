@@ -21,24 +21,24 @@
 
     ### Supported Filters
     #### Sharpen
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="300" height="200">
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/Sharpen_filtered_img.png" width="300" height="200">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="350" height="225">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/Sharpen_filtered_img.png" width="350" height="225">
 
     #### High-pass (edge detection)
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="300" height="200">
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/High-pass_filtered_img.png" width="300" height="200">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="350" height="225">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/High-pass_filtered_img.png" width="350" height="225">
 
     #### Low-pass 
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="300" height="200">
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/Low-pass_filtered_img.png" width="300" height="200">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="350" height="225">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/Low-pass_filtered_img.png" width="350" height="225">
 
     #### Gaussian (image blurring)
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="300" height="200">
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/Gaussian_filtered_img.png" width="300" height="200">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="350" height="225">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/Gaussian_filtered_img.png" width="350" height="225">
 
     #### Derivative of Gaussian (edge detection)
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="300" height="200">
-    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/d_Gaussian_filtered_img.png" width="300" height="200">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="350" height="225">
+    <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/d_Gaussian_filtered_img.png" width="350" height="225">
 
 ## Running Benchmarks
 ### Naive CPU
