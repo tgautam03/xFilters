@@ -40,7 +40,20 @@
     <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/8k.jpg" width="390" height="250">
     <img src="https://raw.githubusercontent.com/tgautam03/xFilters/refs/heads/master/data/d_Gaussian_filtered_img.png" width="390" height="250">
 
-## Running Benchmarks
+## Benchmarks
+
+### Runtime Overview
+
+||CPU|GPU|GPU (Constant Memory)|GPU (Constant Memory + Tiling)|GPU (Pinned Memory)|GPU (Constant + Pinned Memory)|GPU (Constant + Pinned Memory + tiling)|
+|-|-|-|-|-|-|-|-|
+|Allocating Memory|--- | 0.00044032 | 0.000191488 | 0.000313344 | 0.000217088 | 0.000176064 | 0.000154464 |
+|Moving input to Memory|--- | 0.0028009 | 0.00271984 | 0.00283443 | 0.00265677 | 0.00267555 | 0.0026567 |
+|Moving filter to Memory|--- | 8.736e-06 | 0.000128704 | 0.0002504 | 9.632e-06 | 0.000199776 | 0.000105152 |
+|Kernel execution| 0.0607285 | 5.20294e-05 | 5.16403e-05 | 5.53062e-05 | 4.50765e-05 | 4.3735e-05 | 5.37395e-05 |
+|Moving output to Memory| --- | 0.00601299 | 0.00601722 | 0.0065999 | 0.00249299 | 0.00250381 | 0.0024945 |
+|Total| 0.0607285|  0.00931497 | 0.00910889 | 0.0100534 | 0.00542156 | 0.00559894 | 0.00546456 |
+ 
+
 ### Naive CPU
 ```bash
 make 00_cpu_conv2d_benchmark.out 
