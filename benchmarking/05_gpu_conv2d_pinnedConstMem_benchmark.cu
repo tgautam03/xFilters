@@ -246,7 +246,6 @@ int main(int argc, char const *argv[])
     cudaFreeHost(P);
 
     cudaFree(d_N);
-    cudaFree(d_F);
     cudaFree(d_P);
 
     return 0;

@@ -54,8 +54,14 @@ int main(int argc, char const *argv[])
     int new_size = std::max(n_rows, n_cols);
 
     // Allocate memory for the grayscale image (input and output)
-    float* N = new float[new_size * new_size];
-    float *P = new float[new_size * new_size];
+    cudaError_t err;
+    float* N;
+    err = cudaMallocHost((void**)&N, new_size*new_size*sizeof(float));
+    cuda_check(err);
+
+    float *P;
+    err = cudaMallocHost((void**)&P, new_size*new_size*sizeof(float));
+    cuda_check(err);
 
     // Convert to grayscale using weighted average and store in memory
     to_grayscale(img, N, new_size, n_rows, n_cols, channels);
@@ -63,8 +69,6 @@ int main(int argc, char const *argv[])
     // ---------------------------------------------------------- //
     // ----------------- GPU memory allocation ------------------ //
     // ---------------------------------------------------------- //
-    cudaError_t err;
-    
     std::cout << "Allocating GPU memory... \n";
     cudaEventRecord(beg);
     
@@ -106,7 +110,9 @@ int main(int argc, char const *argv[])
     // ----------------------- Initialize filter ------------------------------- //
     // ------------------------------------------------------------------------- //
     std::string filter_type;
-    float *F = new float[(2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1)];
+    float *F;
+    err = cudaMallocHost((void**)&F, (2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1)*sizeof(float));
+    cuda_check(err);
 
     int iter = 0;
     while (true)
@@ -289,9 +295,9 @@ int main(int argc, char const *argv[])
         iter += 1;
     }
 
-    delete[] N;
-    delete[] F;
-    delete[] P;
+    cudaFreeHost(N);
+    cudaFreeHost(F);
+    cudaFreeHost(P);
 
     cudaFree(d_N);
     cudaFree(d_P);

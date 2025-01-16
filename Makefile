@@ -65,12 +65,12 @@ gpu_conv2d_tiled.o: src/gpu_conv2d_tiled.cu
 ############################################################################# Applications #######################################################################################
 ##################################################################################################################################################################################
 # Naive CPU
-cpu_filters: scripts/00_cpu_filter.cpp src/00_cpu_conv2d.cpp build/utils.o
-	@$(CC) -w $(CPU_OPTIMIZE) $(shell pkg-config --cflags --libs opencv4) build/utils.o src/00_cpu_conv2d.cpp scripts/00_cpu_filter.cpp -o bin/00_cpu_filter.out && ./bin/00_cpu_filter.out
+filters_cpu: scripts/00_cpu_filter.cpp cpu_conv2d.o utils.o
+	@$(CC) -w $(CPU_OPTIMIZE) $(shell pkg-config --cflags --libs opencv4) build/utils.o build/cpu_conv2d.o scripts/00_cpu_filter.cpp -o bin/00_cpu_filter.out && ./bin/00_cpu_filter.out
 
 # Naive GPU
-gpu_filter: scripts/01_gpu_filter.cu src/02_gpu_conv2d_constMem.cu build/utils.o
-	@$(CC) -w -rdc=true build/utils.o src/02_gpu_conv2d_constMem.cu scripts/01_gpu_filter.cu -o bin/01_gpu_filter.out && ./bin/01_gpu_filter.out
+filters_gpu: scripts/01_gpu_filter.cu gpu_conv2d_constMem.o utils.o
+	@$(CC) -w -rdc=true build/utils.o build/gpu_conv2d_constMem.o scripts/01_gpu_filter.cu -o bin/01_gpu_filter.out && ./bin/01_gpu_filter.out
 
 ##################################################################################################################################################################################
 ########################################################################## Clean executables #####################################################################################
