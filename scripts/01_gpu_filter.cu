@@ -10,7 +10,6 @@
 #include "../include/02_gpu_conv2d_constMem.cuh"
 #include "../include/utils.hpp"
 
-#define FILTER_RADIUS 1
 __constant__ float d_F[(2*FILTER_RADIUS+1)*(2*FILTER_RADIUS+1)];
 
 // CUDA Error Checking
@@ -43,6 +42,13 @@ int main(int argc, char const *argv[])
 
     std::cout << "Loaded image with Width: " << n_cols << " and Height: " << n_rows << "\n";
     std::cout << "\n";
+
+    if (n_cols == 0 || n_rows == 0)
+    {
+        std::cout << "Image loading failed!" << "\n";
+        std::terminate();
+    }
+    
 
     // Determine size for square image (preprocessing variables)
     int new_size = std::max(n_rows, n_cols);
@@ -123,29 +129,17 @@ int main(int argc, char const *argv[])
             std::cin >> alpha;
             std::cout << "\n";
 
-            F[0] = -alpha/(9-9*alpha);
-            F[1] = -alpha/(9-9*alpha);
-            F[2] = -alpha/(9-9*alpha);
-            F[3] = -alpha/(9-9*alpha);
-            F[4] = (9-alpha)/(9-9*alpha);
-            F[5] = -alpha/(9-9*alpha);
-            F[6] = -alpha/(9-9*alpha);
-            F[7] = -alpha/(9-9*alpha);
-            F[8] = -alpha/(9-9*alpha);
+            F[0] = -alpha/(9-9*alpha);F[1] = -alpha/(9-9*alpha);F[2] = -alpha/(9-9*alpha);
+            F[3] = -alpha/(9-9*alpha);F[4] = (9-alpha)/(9-9*alpha);F[5] = -alpha/(9-9*alpha);
+            F[6] = -alpha/(9-9*alpha);F[7] = -alpha/(9-9*alpha);F[8] = -alpha/(9-9*alpha);
             
         }
         else if (filter_type == "High-pass")
         {
             std::cout << "\n";   
-            F[0] = -1;
-            F[1] = -1;
-            F[2] = -1;
-            F[3] = -1;
-            F[4] = 8;
-            F[5] = -1;
-            F[6] = -1;
-            F[7] = -1;
-            F[8] = -1;
+            F[0] = -1;F[1] = -1;F[2] = -1;
+            F[3] = -1;F[4] = 8;F[5] = -1;
+            F[6] = -1;F[7] = -1;F[8] = -1;
         }
         else if (filter_type == "Low-pass")
         {
@@ -154,15 +148,9 @@ int main(int argc, char const *argv[])
             std::cin >> alpha;
             std::cout << "\n";
 
-            F[0] = 1/alpha;
-            F[1] = 1/alpha;
-            F[2] = 1/alpha;
-            F[3] = 1/alpha;
-            F[4] = 1/alpha;
-            F[5] = 1/alpha;
-            F[6] = 1/alpha;
-            F[7] = 1/alpha;
-            F[8] = 1/alpha;
+            F[0] = 1/alpha;F[1] = 1/alpha;F[2] = 1/alpha;
+            F[3] = 1/alpha;F[4] = 1/alpha;F[5] = 1/alpha;
+            F[6] = 1/alpha;F[7] = 1/alpha;F[8] = 1/alpha;
         }
         else if (filter_type == "Gaussian")
         {
@@ -171,28 +159,16 @@ int main(int argc, char const *argv[])
             std::cin >> alpha;
             std::cout << "\n";
 
-            F[0] = 1/alpha;
-            F[1] = 2/alpha;
-            F[2] = 1/alpha;
-            F[3] = 2/alpha;
-            F[4] = 3/alpha;
-            F[5] = 4/alpha;
-            F[6] = 1/alpha;
-            F[7] = 2/alpha;
-            F[8] = 1/alpha;
+            F[0] = 1/alpha;F[1] = 2/alpha;F[2] = 1/alpha;
+            F[3] = 2/alpha;F[4] = 3/alpha;F[5] = 4/alpha;
+            F[6] = 1/alpha;F[7] = 2/alpha;F[8] = 1/alpha;
         }
         else if (filter_type == "d_Gaussian")
         {
             std::cout << "\n";
-            F[0] = -2;
-            F[1] = 1;
-            F[2] = -2;
-            F[3] = 1;
-            F[4] = 4;
-            F[5] = 1;
-            F[6] = -2;
-            F[7] = 1;
-            F[8] = -2;
+            F[0] = -2;F[1] = 1;F[2] = -2;
+            F[3] = 1;F[4] = 4;F[5] = 1;
+            F[6] = -2;F[7] = 1;F[8] = -2;
         }
         else if (filter_type == "q")
         {
@@ -233,8 +209,8 @@ int main(int argc, char const *argv[])
         // Kernel execution
         cudaEventRecord(beg);
 
-        dim3 dim_block(32, 32, 1);
-        dim3 dim_grid(ceil(new_size/(float)(32)), ceil(new_size/(float)(32)), 1);
+        dim3 dim_block(16, 16, 1);
+        dim3 dim_grid(ceil(new_size/(float)(16)), ceil(new_size/(float)(16)), 1);
         gpu_conv2d_constMem_kernel<<<dim_grid, dim_block>>>(d_N, d_P, new_size, new_size);
         cudaDeviceSynchronize();
         
@@ -303,7 +279,12 @@ int main(int argc, char const *argv[])
         }
 
         // Write the output image to a file
-        stbi_write_png("data/output_img.png", n_cols, n_rows, 1, ucharData.data(), n_cols);
+        stbi_write_png("data/filtered_img.png", n_cols, n_rows, 1, ucharData.data(), n_cols);
+        std::cout << "Image saved: 'data/filtered_img.png' \n";
+        std::cout << "------------------------------------ \n";
+        std::cout << "------------------------------------ \n";
+        std::cout << "------------------------------------ \n";
+        std::cout << "\n";
 
         iter += 1;
     }
@@ -317,4 +298,3 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-

@@ -10,8 +10,6 @@
 #include "../include/00_cpu_conv2d.hpp"
 #include "../include/utils.hpp"
 
-#define FILTER_RADIUS 1
-
 int main(int argc, char const *argv[])
 {
     // Benchmarking variables
@@ -35,7 +33,7 @@ int main(int argc, char const *argv[])
     int new_size = std::max(n_rows, n_cols);
 
     // Allocate memory for the grayscale image (input and output)
-    float* N = new float[new_size * new_size];
+    float *N = new float[new_size * new_size];
     float *P = new float[new_size * new_size];
 
     // Convert to grayscale using weighted average and store in memory
