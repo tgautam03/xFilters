@@ -1,6 +1,8 @@
 # xFilters
 **Convolution** is a popular array operation used in signal processing, digital recording, image/video processing, and computer vision. This repository provides **2D convolution algorithm** written from scratch in **C++ (for CPU)** and **CUDA C++ (for GPU)**, which can be used to apply **filters** to **high resolution** images. 
 
+**Tested on NVIDIA RTX 3090 using Ubuntu 24.04.1 LTS with nvidia-driver-560 and CUDA 12.6.**
+
 > Images are first converted to grayscale and then filter is applied.
 
 **Table of content**
@@ -42,7 +44,7 @@
 
 ## Benchmarks
 
-### Runtime Overview
+### Runtime Overview (time in seconds)
 
 ||CPU|GPU (Naive)|GPU (Constant Memory)|GPU (Constant Memory + Tiling)|GPU (Pinned Memory)|GPU (Constant + Pinned Memory)|GPU (Constant + Pinned Memory + tiling)|
 |-|-|-|-|-|-|-|-|
