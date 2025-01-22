@@ -19,13 +19,12 @@ __global__ void gpu_conv2d_kernel(float const *d_N_ptr, float const *d_F_ptr, fl
             for (int f_col = 0; f_col < 2*FILTER_RADIUS+1; f_col++) 
             {
                 // Input element to filter element mapping
-                // int in_row = out_row + (f_row - FILTER_RADIUS);
-                // int in_col = out_col + (f_col - FILTER_RADIUS);
+                int in_row = out_row + (f_row - FILTER_RADIUS);
+                int in_col = out_col + (f_col - FILTER_RADIUS);
                         
                 // Boundary check
-                if ((out_row + (f_row - FILTER_RADIUS)) >= 0 && (out_row + (f_row - FILTER_RADIUS)) < n_rows && (out_col + (f_col - FILTER_RADIUS)) >= 0 && (out_col + (f_col - FILTER_RADIUS)) < n_cols) 
-                    p_val += d_F_ptr[f_row*(2*FILTER_RADIUS+1) + f_col] * d_N_ptr[(out_row + (f_row - FILTER_RADIUS))*n_cols + (out_col + (f_col - FILTER_RADIUS))];
-                    // p_val += d_F_ptr[f_row*(2*FILTER_RADIUS+1) + f_col] * d_N_ptr[in_row*n_cols + in_col];
+                if (in_row >= 0 && in_row < n_rows && in_col >= 0 && in_col < n_cols) 
+                    p_val += d_F_ptr[f_row*(2*FILTER_RADIUS+1) + f_col] * d_N_ptr[in_row*n_cols + in_col];
             }
         }
         d_P_ptr[out_row*n_cols + out_col] = p_val;
