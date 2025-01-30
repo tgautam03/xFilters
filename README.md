@@ -3,9 +3,9 @@
 
 **Tested on NVIDIA RTX 3090 using Ubuntu 24.04.1 LTS with nvidia-driver-560 and CUDA 12.6.**
 
-> Images are first converted to grayscale and then filter is applied.
+> Images are first converted to grayscale, and then the filter is applied.
 
-**Table of content**
+**Table of contents**
 
 0. Naive 2D convolution on a CPU.
 1. Naive 2D convolution on a GPU.
